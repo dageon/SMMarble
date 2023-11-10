@@ -79,6 +79,8 @@ int main(int argc, const char * argv[]) {
     char food[MAX_CHARNAME];
     int charge;
     
+    char festival[MAX_CHARNAME];
+    
     int i;
     
     board_nr = 0;
@@ -136,7 +138,7 @@ int main(int argc, const char * argv[]) {
     printf("Total number of food cards : %i\n", food_nr);
 
     
-    /*
+    
     //3. festival card config 
     if ((fp = fopen(FESTFILEPATH,"r")) == NULL)
     {
@@ -145,13 +147,20 @@ int main(int argc, const char * argv[]) {
     }
     
     printf("\n\nReading festival card component......\n");
-    while () //read a festival card string
+    while ((fscanf(fp, "%s", festival)) == 1) //read a festival card string
     {
         //store the parameter set
+        smmObj_genFestival(festival);
+        festival_nr++;
     }
     fclose(fp);
+    
+    for(i=0;i<festival_nr;i++)
+    {
+    	printf("=> %i. %s\n", i, smmObjname_getFestivalname(i));
+    }
     printf("Total number of festival cards : %i\n", festival_nr);
-    */
+    
     
     
     //2. Player configuration ---------------------------------------------------------------------------------

@@ -25,6 +25,9 @@ static char smmNodeName[MAX_NODETYPE][MAX_CHARNAME] = {"lecture", "restaurant", 
 static int smmObj_food[MAX_NODE][MAX_CHARNAME];
 static int smmObj_charge[MAX_NODE];
 static int smmObj_noFood = 0;
+
+static int smmObj_festival[MAX_NODE][MAX_CHARNAME];
+static int smmObj_noFestival = 0;
     
 //object generation
 void smmObj_genNode(char* name, int type, int credit, int energy)
@@ -41,6 +44,12 @@ void smmObj_genFood(char* food, int charge)
 	strcpy(smmObj_food[smmObj_noFood], food);
     smmObj_charge[smmObj_noFood] = charge;
     smmObj_noFood++;
+}
+
+void smmObj_genFestival(char* festival)
+{
+	strcpy(smmObj_festival[smmObj_noFestival], festival);
+    smmObj_noFestival++;
 }
 
 //member retrieving
@@ -66,6 +75,10 @@ int smmObjtype_getfoodCharge(int node_nr)
 	return smmObj_charge[node_nr];
 }
 
+char* smmObjname_getFestivalname(int node_nr)
+{
+	return smmObj_festival[node_nr];
+}
 //element to string
 char* smmObj_getNodetype(int node_nr)
 {
