@@ -75,6 +75,10 @@ int main(int argc, const char * argv[]) {
     int type;
     int credit;
     int energy;
+    
+    char food[MAX_CHARNAME];
+    int charge;
+    
     int i;
     
     board_nr = 0;
@@ -108,7 +112,7 @@ int main(int argc, const char * argv[]) {
 	printf("Total number of board nodes : %i\n", board_nr);
     
     
-    /*
+    
     //2. food card config 
     if ((fp = fopen(FOODFILEPATH,"r")) == NULL)
     {
@@ -117,13 +121,20 @@ int main(int argc, const char * argv[]) {
     }
     
     printf("\n\nReading food card component......\n");
-    while () //read a food parameter set
+    while ((fscanf(fp, "%s%i", food, &charge)) == 2) //read a food parameter set
     {
         //store the parameter set
+        smmObj_genFood(food, charge);
+        food_nr++;
     }
     fclose(fp);
+    
+    for(i=0;i<food_nr;i++)
+    {
+    	printf("=> %i. %s, credit:%i\n", i, smmObjname_getFoodname(i), smmObjtype_getfoodCharge(i));
+    }
     printf("Total number of food cards : %i\n", food_nr);
-    */
+
     
     /*
     //3. festival card config 
