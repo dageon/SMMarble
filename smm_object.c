@@ -22,11 +22,11 @@ static int smmObj_energy[MAX_NODE];
 static int smmObj_noNode = 0;
 static char smmNodeName[MAX_NODETYPE][MAX_CHARNAME] = {"lecture", "restaurant", "laboratory", "home", "experiment", "foodChance", "festival"};
 
-static int smmObj_food[MAX_NODE][MAX_CHARNAME];
+static char smmObj_food[MAX_NODE][MAX_CHARNAME];
 static int smmObj_charge[MAX_NODE];
 static int smmObj_noFood = 0;
 
-static int smmObj_festival[MAX_NODE][MAX_CHARNAME];
+static char smmObj_festival[MAX_NODE][MAX_CHARNAME];
 static int smmObj_noFestival = 0;
     
 //object generation
