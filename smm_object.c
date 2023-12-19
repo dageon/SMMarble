@@ -33,20 +33,26 @@ typedef struct smmObject {
 	smmObjGrade_e grade;
 } smmObject_t;
 
+typedef struct smmFood{
+	char food[MAX_CHARNAME];
+	int charge;
+} smmObject_f;
+
+typedef struct smmFestival{
+	char festival[MAX_CHARNAME];
+} smmObject_v;
 
 //static smmObject_t smm_node[MAX_NODE];
 //static int smmObj_noNode = 0;
 
-static char smmObj_food[MAX_NODE][MAX_CHARNAME];
-static int smmObj_charge[MAX_NODE];
-static int smmObj_noFood = 0;
+//static char smmObj_food[MAX_NODE][MAX_CHARNAME];
+//static int smmObj_charge[MAX_NODE];
+//static int smmObj_noFood = 0;
 
-static char smmObj_festival[MAX_NODE][MAX_CHARNAME];
-static int smmObj_noFestival = 0;
+//static char smmObj_festival[MAX_NODE][MAX_CHARNAME];
+//static int smmObj_noFestival = 0;
 
-
-
-// 3. 관련 함수 변경  
+ 
 //object generation
 void* smmObj_genObject(char* name, smmObjType_e objType, int type, int credit, int energy, smmObjGrade_e grade)
 {
@@ -63,17 +69,27 @@ void* smmObj_genObject(char* name, smmObjType_e objType, int type, int credit, i
     return ptr;
 }
 
-void smmObj_genFood(char* food, int charge)
+//음식 카드 생성 
+void* smmObj_genFood(char* food, int charge)
 {
-	strcpy(smmObj_food[smmObj_noFood], food);
-    smmObj_charge[smmObj_noFood] = charge;
-    smmObj_noFood++;
+	smmObject_f* ptr;
+	ptr = (smmObject_f*)malloc(sizeof(smmObject_f));
+	
+	strcpy(ptr->food, food);
+	ptr->charge = charge;
+	
+	return ptr;
 }
 
-void smmObj_genFestival(char* festival)
+//페스티벌 카드 생성 
+void* smmObj_genFestival(char* festival)
 {
-	strcpy(smmObj_festival[smmObj_noFestival], festival);
-    smmObj_noFestival++;
+	smmObject_v* ptr;
+	ptr = (smmObject_v*)malloc(sizeof(smmObject_v));
+	
+	strcpy(ptr->festival, festival);
+    
+    return ptr;
 }
 
 //member retrieving
@@ -102,18 +118,24 @@ int smmObj_getNodeEnergy(void* obj)
 }
 
 
-char* smmObj_getFoodname(int node_nr)
+//음식 카드 초기 
+char* smmObj_getFoodname(void* obj)
 {
-	return smmObj_food[node_nr];
+	smmObject_f* ptr = (smmObject_f*)obj;
+	return ptr->food;
 }
-int smmObj_getFoodCharge(int node_nr)
+int smmObj_getFoodCharge(void* obj)
 {
-	return smmObj_charge[node_nr];
+	smmObject_f* ptr = (smmObject_f*)obj;
+	return ptr->charge;
 }
 
-char* smmObj_getFestivalname(int node_nr)
+
+//페스티벌 카드 초기화 
+char* smmObj_getFestivalname(void* obj)
 {
-	return smmObj_festival[node_nr];
+	smmObject_v* ptr = (smmObject_v*)obj;
+	return ptr->festival;
 }
 
 //element to string

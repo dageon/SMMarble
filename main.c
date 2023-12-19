@@ -216,11 +216,9 @@ int main(int argc, const char * argv[]) {
 			smmObj_getNodeCredit(boardObj),
 			smmObj_getNodeEnergy(boardObj));
 	}
-	
-	
     
     
-    /*
+    
     //2. food card config 
     if ((fp = fopen(FOODFILEPATH,"r")) == NULL)
     {
@@ -231,19 +229,28 @@ int main(int argc, const char * argv[]) {
     printf("\n\nReading food card component......\n");
     while ((fscanf(fp, "%s%i", food, &charge)) == 2) //read a food parameter set
     {
-        //store the parameter set
-        smmObj_genFood(food, charge);
+    	//store the parameter set
+    	void *foodObj = smmObj_genFood(food, charge);
+        smmdb_addTail(LISTNO_FOODCARD, foodObj);
+        
         food_nr++;
     }
     fclose(fp);
     
+    
     for(i=0;i<food_nr;i++)
     {
-    	printf("=> %i. %s, credit:%i\n", i, smmObj_getFoodname(i), smmObj_getFoodCharge(i));
+    	void *foodObj = smmdb_getData(LISTNO_FOODCARD, i);
+
+    	printf("=> %i. %s charge:%i\n",
+			i, smmObj_getFoodname(foodObj),
+			smmObj_getFoodCharge(foodObj));
+    	
+    	//printf("=> %i. %s, credit:%i\n", i, smmObj_getFoodname(i), smmObj_getFoodCharge(i));
     }
     printf("Total number of food cards : %i\n", food_nr);
 
-    
+
     
     //3. festival card config 
     if ((fp = fopen(FESTFILEPATH,"r")) == NULL)
@@ -255,19 +262,21 @@ int main(int argc, const char * argv[]) {
     printf("\n\nReading festival card component......\n");
     while ((fscanf(fp, "%s", festival)) == 1) //read a festival card string
     {
-        //store the parameter set
-        smmObj_genFestival(festival);
+    	void *festObj = smmObj_genFestival(festival);
+        smmdb_addTail(LISTNO_FESTCARD, festObj);
+        
         festival_nr++;
     }
     fclose(fp);
     
     for(i=0;i<festival_nr;i++)
     {
-    	printf("=> %i. %s\n", i, smmObj_getFestivalname(i));
+    	void *festObj = smmdb_getData(LISTNO_FESTCARD, i);
+    	printf("=> %i. %s\n", i, smmObj_getFestivalname(festObj));
     }
     printf("Total number of festival cards : %i\n", festival_nr);
     
-    */
+    
     
     //2. Player configuration ---------------------------------------------------------------------------------
     
