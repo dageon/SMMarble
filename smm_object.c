@@ -13,14 +13,29 @@
 #define MAX_GRADE       9
 #define MAX_NODE		100
 
+static char smmNodeName[SMMNODE_TYPE_MAX][MAX_CHARNAME] = {
+	"lecture",
+	"restaurant",
+	"laboratory",
+	"home",
+	"experiment",
+	"foodChance",
+	"festival"
+};
+
+// 구조체 형식 정의 
+typedef struct smmObject {
+	char name[MAX_CHARNAME];
+	smmObjType_e objType;
+	int type;
+	int credit;
+	int energy;
+	smmObjGrade_e grade;
+} smmObject_t;
 
 
-static char smmObj_name[MAX_NODE][MAX_CHARNAME];
-static int smmObj_type[MAX_NODE];
-static int smmObj_credit[MAX_NODE];
-static int smmObj_energy[MAX_NODE];
-static int smmObj_noNode = 0;
-static char smmNodeName[MAX_NODETYPE][MAX_CHARNAME] = {"lecture", "restaurant", "laboratory", "home", "experiment", "foodChance", "festival"};
+//static smmObject_t smm_node[MAX_NODE];
+//static int smmObj_noNode = 0;
 
 static char smmObj_food[MAX_NODE][MAX_CHARNAME];
 static int smmObj_charge[MAX_NODE];
@@ -28,15 +43,24 @@ static int smmObj_noFood = 0;
 
 static char smmObj_festival[MAX_NODE][MAX_CHARNAME];
 static int smmObj_noFestival = 0;
-    
+
+
+
+// 3. 관련 함수 변경  
 //object generation
-void smmObj_genNode(char* name, int type, int credit, int energy)
+void* smmObj_genObject(char* name, smmObjType_e objType, int type, int credit, int energy, smmObjGrade_e grade)
 {
-	strcpy(smmObj_name[smmObj_noNode], name);
-    smmObj_type[smmObj_noNode] = type;
-    smmObj_credit[smmObj_noNode] = credit;
-    smmObj_energy[smmObj_noNode] = energy;
-    smmObj_noNode++;
+	smmObject_t* ptr;
+	ptr = (smmObject_t*)malloc(sizeof(smmObject_t));
+	
+	strcpy(ptr->name, name);
+	ptr->objType = objType;
+	ptr->type = type;
+    ptr->credit = credit;
+    ptr->energy = energy;
+    ptr->grade = grade;
+
+    return ptr;
 }
 
 void smmObj_genFood(char* food, int charge)
@@ -53,51 +77,49 @@ void smmObj_genFestival(char* festival)
 }
 
 //member retrieving
-char* smmObjname_getNodename(int node_nr)
+char* smmObj_getNodename(void* obj)
 {
-	return smmObj_name[node_nr];
-}
-int smmObjtype_getnodeCredit(int node_nr)
-{
-	return smmObj_credit[node_nr];
-}
-int smmObjtype_getnodeEnergy(int node_nr)
-{
-	return smmObj_energy[node_nr];
+	smmObject_t* ptr = (smmObject_t*)obj;
+	return ptr->name;
 }
 
-char* smmObjname_getFoodname(int node_nr)
+int smmObj_getNodeType(void* obj)
+{
+	smmObject_t* ptr = (smmObject_t*)obj;
+	return ptr->type;
+}
+
+int smmObj_getNodeCredit(void* obj)
+{
+	smmObject_t* ptr = (smmObject_t*)obj;
+	return ptr->credit;
+}
+
+int smmObj_getNodeEnergy(void* obj)
+{
+	smmObject_t* ptr = (smmObject_t*)obj;
+	return ptr->energy;
+}
+
+
+char* smmObj_getFoodname(int node_nr)
 {
 	return smmObj_food[node_nr];
 }
-int smmObjtype_getfoodCharge(int node_nr)
+int smmObj_getFoodCharge(int node_nr)
 {
 	return smmObj_charge[node_nr];
 }
 
-char* smmObjname_getFestivalname(int node_nr)
+char* smmObj_getFestivalname(int node_nr)
 {
 	return smmObj_festival[node_nr];
 }
+
 //element to string
-char* smmObj_getNodetype(int node_nr)
+char* smmObj_getTypeName(int type)
 {
-	switch(smmObj_type[node_nr]) {
-		case SMMNODE_TYPE_LECTURE:
-			return smmNodeName[SMMNODE_TYPE_LECTURE];
-		case SMMNODE_TYPE_RESTAURANT:
-			return smmNodeName[SMMNODE_TYPE_RESTAURANT];
-		case SMMNODE_TYPE_LABORATORY:
-			return smmNodeName[SMMNODE_TYPE_LABORATORY];
-		case SMMNODE_TYPE_HOME:
-			return smmNodeName[SMMNODE_TYPE_HOME];
-		case SMMNODE_TYPE_GOTOLAB:
-			return smmNodeName[SMMNODE_TYPE_GOTOLAB];
-		case SMMNODE_TYPE_FOODCHANCE:
-			return smmNodeName[SMMNODE_TYPE_FOODCHANCE];
-		case SMMNODE_TYPE_FESTIVAL:
-			return smmNodeName[SMMNODE_TYPE_FESTIVAL];
-	}
+	return (char*)smmNodeName[type];
 
 }
 /*
