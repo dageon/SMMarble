@@ -59,15 +59,18 @@ void printGrades(int player); //print all the grade history of the player
 
 
 int isGraduated(int player) {
+	//플레이어가 GRADUATE_CREDIT 이상 학점을 이수하고 + 집에 도착 시 게임 종료 
 	if((cur_player[player].accumCredit >= GRADUATE_CREDIT) && cur_player[player].position == 0){
 		cur_player[player].flag_graduate = 1;
 	}
 	return cur_player[player].flag_graduate;
 }
 
+
 //학점 출력을 위한 배열 
 const char* gradename[] = {"A+", "A0", "A-", "B+", "B0", "B-", "C+", "C0", "C-"};
 const double gradenum[] = {4.3, 4.0, 3.7, 3.3, 3.0, 2.7, 2.3, 2.0, 1.7};
+
 
 void printGrades(int player)
 {
@@ -112,24 +115,22 @@ void printGrades(int player)
 	
 }
 
+
 void printPlayerStatus(void) 
 {
 	int i;
 	printf("========================== PLAYER STATUS ==========================\n");
 	for(i=0;i<player_nr;i++)
 	{
-		 printf("%s : credit %i, energy %i, position %i",
+		 printf("%s : credit %i, energy %i, position %i\n",
 		 		cur_player[i].name,
 		 		cur_player[i].accumCredit,
 				cur_player[i].energy, 
 				cur_player[i].position);
-		if(cur_player[i].flag_escape == 1){
-			printf("(exp)");
-		}
-		printf("\n");
 	}
 	printf("========================== PLAYER STATUS ==========================\n\n");
 }
+
 
 void generatePlayers(int n, int initEnergy) //generate a new player
 {
@@ -159,6 +160,7 @@ void generatePlayers(int n, int initEnergy) //generate a new player
 		cur_player[i].flag_escape = 0;
 	}
 }
+
 
 //보드판 주사위 굴리는 함수 
 int rolldie(int player)
@@ -190,7 +192,6 @@ void play_exp(int player, int sucess) {
 		cur_player[player].flag_escape=1;
 	}
 }
-
 
 
 //action code when a player stays at a node
@@ -281,7 +282,7 @@ void actionNode(int player)
 			if (cur_player[player].flag_escape == 1) {
 				printf("실험을 진행합니다.(기준값: %d)\n", sucess);
 				//실험 진행 
-				play_exp(turn, sucess);
+				play_exp(player, sucess);
 				//만약 실험 결과 성공했다면 
 				if(cur_player[player].flag_escape==0) {
 					cur_player[player].position = 12; //실험중으로 이동
@@ -308,6 +309,7 @@ void actionNode(int player)
 			
 		//case foodChance:
 		case SMMNODE_TYPE_FOODCHANCE:
+			//랜덤으로 음식 카드를 뽑는다 
 			foodPtr = smmdb_getData(LISTNO_FOODCARD, rand()%smmdb_len(LISTNO_FOODCARD));
 			printf("%s의 음식 찬스!  ", cur_player[player].name);
 			printf("음식 카드를 뽑기 위해 아무 키나 눌러주세요.  ");
@@ -319,6 +321,7 @@ void actionNode(int player)
 			
 		//case festival:
 		case SMMNODE_TYPE_FESTIVAL:
+			//랜덤으로 페스티벌 카드를 뽑는다 
 			festPtr = smmdb_getData(LISTNO_FESTCARD, rand()%smmdb_len(LISTNO_FESTCARD));
 			printf("%s의 축제 참여!  ", cur_player[player].name);
 			printf("페스티벌 카드를 뽑기 위해 아무 키나 눌러주세요.  ");
@@ -334,6 +337,8 @@ void actionNode(int player)
     }
 }
 
+
+//보드판 이동 
 void goForward(int player, int step) {
 	void *boardPtr;
 	int i;
@@ -375,6 +380,7 @@ void goForward(int player, int step) {
 				cur_player[player].position,
 				smmObj_getNodename(boardPtr));
 }
+
 
 //주사위 굴리는 함수 (실험에 쓰임)
 int rollDice() {
@@ -502,7 +508,7 @@ int main(int argc, const char * argv[]) {
     }
     
     
-    // 게임 시작 화면
+    // 게임 시작 화면 출력 
 	printf("\n\n\n=======================================================================\n");
 	printf("-----------------------------------------------------------------------\n");
 	printf("        Sookmyung Marble !! Let's Graduate (total credit : %d)!!\n", GRADUATE_CREDIT);
@@ -534,14 +540,17 @@ int main(int argc, const char * argv[]) {
         //4-1. initial printing
         printPlayerStatus();
         
+        //4-2. die rolling (if not in experiment)
         if(cur_player[turn].flag_escape != 1) {
         	die_result = rolldie(turn);
         	printf("--> die result: %i\n", die_result);
         	goForward(turn, die_result);
 		}
+		// (if in experiment)
 		else {
 			die_result = rolldie(turn);
 		}
+		
         /*
         //4-2. die rolling (if not in experiment)
         die_result = rolldie(turn);
