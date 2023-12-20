@@ -56,6 +56,7 @@ typedef enum smmObjGrade {
 	smmObjGrade_Cp,
 	smmObjGrade_C0,
 	smmObjGrade_Cm,
+	smmObjGrade_COUNT
 } smmObjGrade_e;
 
 

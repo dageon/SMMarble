@@ -33,6 +33,7 @@ typedef struct smmObject {
 	smmObjGrade_e grade;
 } smmObject_t;
 
+
 typedef struct smmFood{
 	char food[MAX_CHARNAME];
 	int charge;
@@ -58,7 +59,7 @@ void* smmObj_genObject(char* name, smmObjType_e objType, int type, int credit, i
 {
 	smmObject_t* ptr;
 	ptr = (smmObject_t*)malloc(sizeof(smmObject_t));
-	
+
 	strcpy(ptr->name, name);
 	ptr->objType = objType;
 	ptr->type = type;
