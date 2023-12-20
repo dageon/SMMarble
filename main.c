@@ -73,10 +73,10 @@ void printGrades(int player)
 	
 	for (i=0;i<smmdb_len(LISTNO_OFFSET_GRADE + player);i++)
 	{
-		//저장된 성적 데이터 읽어옴 
+		//저장된 성적 데이터 읽어옵 
 		gradePtr = smmdb_getData(LISTNO_OFFSET_GRADE + player, i);
-		//일단은 숫자가 아닌 알파벳으로 출력 
-		printf("--> Printing player's grade (average ((구현))) ::::\n") ; //이부분 수정 필요 
+		//알파벳 출력 
+		printf("--> Printing player's grade (average ((구현))) ::::\n") ;
 		printf("%s : %s\n", smmObj_getNodename(gradePtr), gradename[smmObj_NodeGrade(gradePtr)]);
 	}
 }
@@ -122,7 +122,7 @@ void generatePlayers(int n, int initEnergy) //generate a new player
 	}
 }
 
-//보드판 주사위 굴리는 함수
+//보드판 주사위 굴리는 함수 
 int rolldie(int player)
 {
     char c;
@@ -166,25 +166,63 @@ void actionNode(int player)
 	int grade;
 	int sucess;
 	int turn = (turn+1)%player_nr;
+	
+	int check=-1; 
 	char c;
 	
     switch(type)
     {
         //case lecture:
         case SMMNODE_TYPE_LECTURE:
-        	//수강할건지 물어봐야함 
-        	//이전에 듣지 않은 강의여야 함 
-        	if(cur_player[player].energy < smmObj_getNodeEnergy(boardPtr)) {
-        		printf("%s는 에너지가 부족해 강의 수강 불가능\n", cur_player[player].name); 
+        	printf("%s 수강하시겠습니까? 수강을 원하면 1, 원하지 않으면 0을 입력하세요.", smmObj_getNodename(boardPtr));
+
+        	while(1){
+        		scanf("%d", &check);
+        		fflush(stdin);
+        		if(check==1){
+        			if(cur_player[player].energy < smmObj_getNodeEnergy(boardPtr)) {
+        				printf("%s는 에너지가 부족해 강의 수강 불가능\n", cur_player[player].name);
+        				break;
+					}
+					cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr);
+        			cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr);
+        		
+					gradePtr = smmObj_genObject(name, smmObjType_grade, 0, smmObj_getNodeCredit(boardPtr), 0, rand()%smmObjGrade_COUNT);
+					printf("%s 수강하였습니다\n\n", smmObj_getNodename(boardPtr));
+            		smmdb_addTail(LISTNO_OFFSET_GRADE + player, gradePtr);
+        			break;
+				}
+        		else if(check==0) {
+        			printf("%s 드랍하였습니다\n\n", smmObj_getNodename(boardPtr));
+        			break;
+				}
+				else{
+					printf("1(수강), 0(드랍) 중에서  입력해주세요.  ");
+				}
+			}
+			break; 
+			/*
+        	if(check==1){
+        		if(cur_player[player].energy < smmObj_getNodeEnergy(boardPtr)) {
+        			printf("%s는 에너지가 부족해 강의 수강 불가능\n", cur_player[player].name);
+        			
+        			break;
+				}
+				cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr);
+        		cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr);
+        		
+				gradePtr = smmObj_genObject(name, smmObjType_grade, 0, smmObj_getNodeCredit(boardPtr), 0, rand()%smmObjGrade_COUNT);
+				printf("%s 수강하였습니다\n\n", smmObj_getNodename(boardPtr));
+            	smmdb_addTail(LISTNO_OFFSET_GRADE + player, gradePtr);
+            	
         		break;
 			}
-        	cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr);
-        	cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr);
+        	else if(check==0) {
+        		printf("%s 드랍하였습니다\n\n", smmObj_getNodename(boardPtr));
+        		break;
+			}
+			*/
 
-			gradePtr = smmObj_genObject(name, smmObjType_grade, 0, smmObj_getNodeCredit(boardPtr), 0, rand()%smmObjGrade_COUNT);
-			printf("%s 넣었다\n", smmObj_getNodename(boardPtr));
-            smmdb_addTail(LISTNO_OFFSET_GRADE + player, gradePtr);
-        	break;
         //case restaurant:
         case SMMNODE_TYPE_RESTAURANT:
         	cur_player[player].energy += smmObj_getNodeEnergy(boardPtr);
@@ -199,7 +237,7 @@ void actionNode(int player)
 				break;
 			}
 			else {	
-				printf("%s는 그냥 실험실을 지나칩니다.\n",cur_player[player].name);
+				printf("%s는 그대로 실험실을 지나칩니다.\n",cur_player[player].name);
 			}
 			/*
         	if(cur_player[player].flag_graduate == 1) {
@@ -227,7 +265,7 @@ void actionNode(int player)
         case SMMNODE_TYPE_GOTOLAB:
         	printf("실험 중 상태\n\n");
         	sucess = rollDice();
-        	cur_player[player].position = 8; //이부분 고쳐야 함 
+        	cur_player[player].position = 8; //??κ? ????? ?? 
         	cur_player[player].flag_escape = 1;
         	play_exp(turn, sucess);
 			break;
@@ -241,7 +279,7 @@ void actionNode(int player)
 			cur_player[player].energy += smmObj_getFoodCharge(foodPtr);
 			printf("%s는 %s 먹고  에너지(%i) 보충합니다.\n\n",cur_player[player].name, smmObj_getFoodname(foodPtr), smmObj_getFoodCharge(foodPtr));
 			break;
-		//case가 festival:
+		//case?? festival:
 		case SMMNODE_TYPE_FESTIVAL:
 			festPtr = smmdb_getData(LISTNO_FESTCARD, rand()%smmdb_len(LISTNO_FESTCARD));
 			printf("%s의 축제 참여!  ", cur_player[player].name);
@@ -261,7 +299,7 @@ void actionNode(int player)
 void goForward(int player, int step) {
 	void *boardPtr;
 
-	// step을 더했을 때 위치 값이 보드판 번호를 벗어나는 경우 조절 
+	// step을 더했을 때 위치 값이 보드판 번호를 벗어나는 경우 조절하기 위한 함수 
     if((cur_player[player].position+step)>=16) {
 			cur_player[player].position -= 16;
 			printf("다시 처음");
