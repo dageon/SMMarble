@@ -188,7 +188,7 @@ void actionNode(int player)
         //case restaurant:
         case SMMNODE_TYPE_RESTAURANT:
         	cur_player[player].energy += smmObj_getNodeEnergy(boardPtr);
-        	printf("%s는 %s 에서 에너지(%i) 보충합니다.\n\n", cur_player[player].name, smmObj_getNodename(boardPtr), smmObj_getNodeEnergy(boardPtr));
+        	printf("%s는 %s에서 에너지(%i) 보충합니다.\n\n", cur_player[player].name, smmObj_getNodename(boardPtr), smmObj_getNodeEnergy(boardPtr));
         	break;
         //case laboratory:
         case SMMNODE_TYPE_LABORATORY:
@@ -234,13 +234,17 @@ void actionNode(int player)
 		//case foodChance:
 		case SMMNODE_TYPE_FOODCHANCE:
 			foodPtr = smmdb_getData(LISTNO_FOODCARD, rand()%smmdb_len(LISTNO_FOODCARD));
+			printf("%s의 음식 찬스!  ", cur_player[player].name);
+			printf("음식 카드를 뽑기 위해 아무 키나 눌러주세요.  ");
+			c = getchar();
+			fflush(stdin);
 			cur_player[player].energy += smmObj_getFoodCharge(foodPtr);
-			printf("%s는 FOOD CHANCE로 %s 먹었습니다.\n\n",cur_player[player].name, smmObj_getFoodname(foodPtr));
+			printf("%s는 %s 먹고  에너지(%i) 보충합니다.\n\n",cur_player[player].name, smmObj_getFoodname(foodPtr), smmObj_getFoodCharge(foodPtr));
 			break;
 		//case가 festival:
 		case SMMNODE_TYPE_FESTIVAL:
 			festPtr = smmdb_getData(LISTNO_FESTCARD, rand()%smmdb_len(LISTNO_FESTCARD));
-			printf("%s의 축제 참여!  ",cur_player[player].name);
+			printf("%s의 축제 참여!  ", cur_player[player].name);
 			printf("페스티벌 카드를 뽑기 위해 아무 키나 눌러주세요.  ");
 			c = getchar();
 			fflush(stdin);
