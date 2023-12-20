@@ -30,8 +30,9 @@ typedef struct plyaer {
 	int position;
 	char name[MAX_CHARNAME];
 	int accumCredit;
+	
 	int flag_graduate;
-	int flag_escape;
+	int flag_escape; 
 } player_t;
 
 static player_t *cur_player;
@@ -161,13 +162,16 @@ void actionNode(int player)
 	void *gradePtr;
 	//int type = smmObj_getNodeType(cur_player[player].position);
 	int type = smmObj_getNodeType(boardPtr);
-	char *name = smmObj_getNodename(boardPtr);
 	int grade;
 	int sucess;
 	int turn = (turn+1)%player_nr;
 	
 	int check=-1; //수강 의사 확인을 위한 변수 
+	 
 	char c;
+	
+	int i; 
+	int lec_flag=0;
 	
     switch(type)
     {
@@ -186,13 +190,31 @@ void actionNode(int player)
         				printf("%s는 에너지가 부족해 강의 수강 불가능\n", cur_player[player].name);
         				break;
 					}
-					cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr);
-        			cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr);
+								
+
+					for(i=0;i<smmdb_len(LISTNO_OFFSET_GRADE + player);i++){
+						gradePtr = smmdb_getData(LISTNO_OFFSET_GRADE + player, i);
+						if(strcmp(smmObj_getNodename(gradePtr),smmObj_getNodename(boardPtr))==0){
+							printf("이미 수강한 강의입니다.\n") ;
+							printf("%s %s \n\n",smmObj_getNodename(gradePtr),smmObj_getNodename(boardPtr));
+							lec_flag=1;
+							break;
+						}
+					}
+					
+					
+					if(lec_flag!=1){
+						cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr);
+        				cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr);
         		
-					gradePtr = smmObj_genObject(name, smmObjType_grade, 0, smmObj_getNodeCredit(boardPtr), 0, rand()%smmObjGrade_COUNT);
-					printf("%s 수강하였습니다\n\n", smmObj_getNodename(boardPtr));
-            		smmdb_addTail(LISTNO_OFFSET_GRADE + player, gradePtr);
-        			break;
+						gradePtr = smmObj_genObject(smmObj_getNodename(boardPtr), smmObjType_grade, 0, smmObj_getNodeCredit(boardPtr), 0, rand()%smmObjGrade_COUNT);
+						printf("%s 수강하였습니다\n\n", smmObj_getNodename(boardPtr));
+            			smmdb_addTail(LISTNO_OFFSET_GRADE + player, gradePtr);
+
+        				break;
+					}
+					break;
+
 				}
 				// 드랍 
         		else if(check==0) {
@@ -208,7 +230,7 @@ void actionNode(int player)
         //case restaurant:
         case SMMNODE_TYPE_RESTAURANT:
         	cur_player[player].energy += smmObj_getNodeEnergy(boardPtr);
-        	printf("%s는 %s에서 에너지(%i) 보충합니다.\n\n", cur_player[player].name, smmObj_getNodename(boardPtr), smmObj_getNodeEnergy(boardPtr));
+        	printf("%s는 %s에서 에너지(%i) 획득합니다.\n\n", cur_player[player].name, smmObj_getNodename(boardPtr), smmObj_getNodeEnergy(boardPtr));
         	break;
         	
         //case laboratory:
@@ -402,6 +424,7 @@ int main(int argc, const char * argv[]) {
         food_nr++;
     }
     fclose(fp);
+    printf("Total number of food cards : %i\n", food_nr);
     
     
     for(i=0;i<food_nr;i++)
@@ -414,7 +437,7 @@ int main(int argc, const char * argv[]) {
     	
     	//printf("=> %i. %s, credit:%i\n", i, smmObj_getFoodname(i), smmObj_getFoodCharge(i));
     }
-    printf("Total number of food cards : %i\n", food_nr);
+    
 
 
     
@@ -434,13 +457,14 @@ int main(int argc, const char * argv[]) {
         festival_nr++;
     }
     fclose(fp);
+    printf("Total number of festival cards : %i\n", festival_nr);
     
     for(i=0;i<festival_nr;i++)
     {
     	void *festObj = smmdb_getData(LISTNO_FESTCARD, i);
     	printf("=> %i. %s\n", i, smmObj_getFestivalname(festObj));
     }
-    printf("Total number of festival cards : %i\n", festival_nr);
+    
     
     
     
