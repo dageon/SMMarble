@@ -214,7 +214,8 @@ void actionNode(int player)
         //case lecture:
         case SMMNODE_TYPE_LECTURE:
         	// 수강 여부를 물어모기 위한 코드 
-        	printf("%s 수강하시겠습니까? 수강을 원하면 1, 원하지 않으면 0을 입력하세요.", smmObj_getNodename(boardPtr));
+        	printf("%s (credit:%d, energy:%d) 수강하시겠습니까? 수강을 원하면 1, 원하지 않으면 0을 입력하세요.",
+						smmObj_getNodename(boardPtr), smmObj_getNodeCredit(boardPtr), smmObj_getNodeEnergy(boardPtr));
 			
 			// 1, 0이 아닌 다른 입력을 했을 경우 다시 입력하게 하기 위해 while문 사용 
         	while(1){
@@ -233,7 +234,6 @@ void actionNode(int player)
 						gradePtr = smmdb_getData(LISTNO_OFFSET_GRADE + player, i);
 						if(strcmp(smmObj_getNodename(gradePtr),smmObj_getNodename(boardPtr))==0){
 							printf("이미 수강한 강의입니다.\n") ;
-							printf("%s %s \n\n",smmObj_getNodename(gradePtr),smmObj_getNodename(boardPtr));
 							lec_flag=1;
 							break;
 						}
