@@ -31,8 +31,7 @@ typedef struct plyaer {
 	char name[MAX_CHARNAME];
 	int accumCredit;
 	int flag_graduate;
-	
-	int flag_escape; 
+	int flag_escape; //실험실 탈출 확인하는 flag 
 } player_t;
 
 static player_t *cur_player;
@@ -119,11 +118,15 @@ void printPlayerStatus(void)
 	printf("========================== PLAYER STATUS ==========================\n");
 	for(i=0;i<player_nr;i++)
 	{
-		 printf("%s : credit %i, energy %i, position %i\n",
+		 printf("%s : credit %i, energy %i, position %i",
 		 		cur_player[i].name,
 		 		cur_player[i].accumCredit,
 				cur_player[i].energy, 
 				cur_player[i].position);
+		if(cur_player[i].flag_escape == 1){
+			printf("(exp)");
+		}
+		printf("\n");
 	}
 	printf("========================== PLAYER STATUS ==========================\n\n");
 }
@@ -151,6 +154,9 @@ void generatePlayers(int n, int initEnergy) //generate a new player
 		
 		//set flag_graduate
 		cur_player[i].flag_graduate = 0;
+		
+		//set flag_escape
+		cur_player[i].flag_escape = 0;
 	}
 }
 
@@ -171,15 +177,16 @@ int rolldie(int player)
 }
 
 
+//실험을 진행하는 함수 
 void play_exp(int player, int sucess) {
 	int dicenum = rollDice();
 	printf("\n주사위값 : %i\n", dicenum);
 	if(dicenum>=sucess){
-		printf("플레이어 탈출\n");
+		printf("플레이어 탈출\n\n");
 		cur_player[player].flag_escape=0;
 	}
 	else{
-		printf("플레이어 탈출 실패\n");
+		printf("플레이어 탈출 실패\n\n");
 		cur_player[player].flag_escape=1;
 	}
 }
@@ -194,16 +201,18 @@ void actionNode(int player)
 	void *festPtr;
 	void *gradePtr;
 	int type = smmObj_getNodeType(boardPtr); 
-	
-	int sucess;
-	int turn = (turn+1)%player_nr;
+
 	
 	int check=-1; //수강 의사 확인을 위한 변수 
 	int lec_flag=0; //수강 여부 확인을 위한 flag 
 	
-	char c; //카드 뽑을 때 입력받을 변수 
+	char c; //카드 뽑을 때 키보드로 아무거나 입력받을 변수
 	
 	int i; //for문 사용 변수
+	
+	int sucess; //실험 성공 기준값
+	
+	int turn = (turn+1)%player_nr;
 	
 	
     switch(type)
@@ -219,13 +228,7 @@ void actionNode(int player)
         		scanf("%d", &check);
         		fflush(stdin);
         		// 수강 
-        		if(check==1){
-        			// 에너지 먼저 확인 
-        			if(cur_player[player].energy < smmObj_getNodeEnergy(boardPtr)) {
-        				printf("%s는 에너지가 부족해 강의 수강 불가능\n", cur_player[player].name);
-        				break;
-					}
-								
+        		if(check==1){	
 					//이미 수강한 강의인지 확인 
 					for(i=0;i<smmdb_len(LISTNO_OFFSET_GRADE + player);i++){
 						gradePtr = smmdb_getData(LISTNO_OFFSET_GRADE + player, i);
@@ -236,13 +239,20 @@ void actionNode(int player)
 						}
 					}
 					
+					// 에너지 확인 
+        			if(cur_player[player].energy < smmObj_getNodeEnergy(boardPtr)) {
+        				printf("%s는 에너지가 부족해 강의 수강 불가능합니다.\n", cur_player[player].name);
+        				break;
+					}
+					
+					
 					//수강하지 않은 강의라면 수강 
 					if(lec_flag!=1){
 						cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr);
         				cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr);
         		
 						gradePtr = smmObj_genObject(smmObj_getNodename(boardPtr), smmObjType_grade, 0, smmObj_getNodeCredit(boardPtr), 0, rand()%smmObjGrade_COUNT);
-						printf("%s 수강하였습니다\n\n", smmObj_getNodename(boardPtr));
+						printf("%s 수강하였습니다 (grade:%s) \n\n", smmObj_getNodename(boardPtr), gradename[smmObj_getNodeGrade(gradePtr)]);
             			smmdb_addTail(LISTNO_OFFSET_GRADE + player, gradePtr);
 
         				break;
@@ -269,29 +279,17 @@ void actionNode(int player)
         //case laboratory:
         case SMMNODE_TYPE_LABORATORY:
 			if (cur_player[player].flag_escape == 1) {
+				printf("실험을 진행합니다.(기준값: %d)\n", sucess);
+				//실험 진행 
 				play_exp(turn, sucess);
-				printf("성공했을까");
-				break;
+				//만약 실험 결과 성공했다면 
+				if(cur_player[player].flag_escape==0) {
+					cur_player[player].position = 12; //실험중으로 이동
+				}
 			}
 			else {	
 				printf("%s는 실험 중 상태가 아니라 그대로 실험실을 지나칩니다.\n\n",cur_player[player].name);
 			}
-			/*
-        	if(cur_player[player].flag_graduate == 1) {
-        		int play = rollDice();
-        		if(play>sucess) {
-        			printf("end the exp\n\n");
-        			cur_player[player].flag_graduate = 0;
-        			cur_player[player].position = 12;
-				}
-        		else {
-					printf("못끝냄\n");
-				}
-			}
-			else {
-				printf("그냥 지나침\n");
-			}
-			*/
         	break;
         	
         //case home:
@@ -303,10 +301,9 @@ void actionNode(int player)
         //case experiment:
         case SMMNODE_TYPE_GOTOLAB:
         	printf("실험 중 상태\n\n");
-        	sucess = rollDice(); 
-        	cur_player[player].position = 8; //??κ? ????? ??  
+        	sucess = rollDice(); //실험 성공 기준값 설정 
+        	cur_player[player].position = 8; //실험실로 이동 
         	cur_player[player].flag_escape = 1; 
-        	play_exp(turn, sucess);
 			break;
 			
 		//case foodChance:
@@ -364,7 +361,7 @@ void goForward(int player, int step) {
 			printf("	%i칸으로 이동 => %s\n", i, smmObj_getNodename(boardPtr));
 		}
 	}
-	// 보드판 번호를 벗어나지 않는 경우 
+	// 보드판 번호를 벗어나지 않는 경우
 	else{
 		for(i=cur_player[player].position+1;i<=cur_player[player].position+step; i++) {
     		boardPtr = smmdb_getData(LISTNO_NODE, i);
@@ -537,12 +534,22 @@ int main(int argc, const char * argv[]) {
         //4-1. initial printing
         printPlayerStatus();
         
+        if(cur_player[turn].flag_escape != 1) {
+        	die_result = rolldie(turn);
+        	printf("--> die result: %i\n", die_result);
+        	goForward(turn, die_result);
+		}
+		else {
+			die_result = rolldie(turn);
+		}
+        /*
         //4-2. die rolling (if not in experiment)
         die_result = rolldie(turn);
         printf("--> die result: %i\n", die_result);
+		*/
 		
         //4-3. go forward
-        goForward(turn, die_result);
+        //goForward(turn, die_result);
 		
 		//졸업한 사람이 생기면 while문을 빠져나감(=게임 종료) 
 		if (isGraduated(turn) == 1) break;
