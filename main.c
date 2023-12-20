@@ -58,7 +58,7 @@ void printGrades(int player); //print all the grade history of the player
 #endif
 
 int isGraduated(int player) {
-	if((cur_player[player].accumCredit >= GRADUATE_CREDIT) && cur_player[player].position == SMMNODE_TYPE_HOME){
+	if((cur_player[player].accumCredit >= GRADUATE_CREDIT) && cur_player[player].position == 0){
 		cur_player[player].flag_graduate = 1;
 	}
 	return cur_player[player].flag_graduate;
@@ -173,11 +173,14 @@ void actionNode(int player)
     {
         //case lecture:
         case SMMNODE_TYPE_LECTURE:
+        	// 수강 여부를 물어모기 위한 코드 
         	printf("%s 수강하시겠습니까? 수강을 원하면 1, 원하지 않으면 0을 입력하세요.", smmObj_getNodename(boardPtr));
-
+			
+			// 1, 0이 아닌 다른 입력을 했을 경우 다시 입력하게 하기 위해 while문 사용 
         	while(1){
         		scanf("%d", &check);
         		fflush(stdin);
+        		// 수강 
         		if(check==1){
         			if(cur_player[player].energy < smmObj_getNodeEnergy(boardPtr)) {
         				printf("%s는 에너지가 부족해 강의 수강 불가능\n", cur_player[player].name);
@@ -191,6 +194,7 @@ void actionNode(int player)
             		smmdb_addTail(LISTNO_OFFSET_GRADE + player, gradePtr);
         			break;
 				}
+				// 드랍 
         		else if(check==0) {
         			printf("%s 드랍하였습니다\n\n", smmObj_getNodename(boardPtr));
         			break;
@@ -281,7 +285,8 @@ void actionNode(int player)
 
 void goForward(int player, int step) {
 	void *boardPtr;
-	int i; 
+	int i;
+	
 	// step을 더했을 때 위치 값이 보드판 번호를 벗어나는 경우 조절하기 위한 함수 
     if((cur_player[player].position+step)>=16) {
 			cur_player[player].position -= 16;
@@ -297,17 +302,22 @@ void goForward(int player, int step) {
 				smmObj_getNodename(boardPtr));
 	*/
 			
-	// 주사위 결과 만큼 이동한 결과 출력 
+	// 주사위 결과 이동하는 과정 출력
 	for(i=cur_player[player].position+1;i<=cur_player[player].position+step; i++) {
     	boardPtr = smmdb_getData(LISTNO_NODE, i);
-    	printf("	%i칸 이동 => %s\n", i, smmObj_getNodename(boardPtr));
+    	printf("	%i칸으로 이동 => %s\n", i, smmObj_getNodename(boardPtr));
     }
+    
+    // 주사위 결과만큼 이동
     cur_player[player].position += step;
+    
+    // 플레이어의 도착 위치 출력
     printf("%s go to node %i (name: %s)\n", cur_player[player].name,
 				cur_player[player].position,
 				smmObj_getNodename(boardPtr));
 }
 
+//주사위 굴리는 함수 (실험에 쓰임)
 int rollDice() {
 	return rand() % MAX_DIE + 1;
 }
@@ -465,7 +475,9 @@ int main(int argc, const char * argv[]) {
 		
         //4-3. go forward
         goForward(turn, die_result);
-
+		
+		//졸업한 사람이 생기면 while문을 빠져나감(=게임 종료) 
+		if (isGraduated(turn) == 1) break;
 		
 		//4-4. take action at the destination node of the board
         actionNode(turn);
@@ -475,6 +487,11 @@ int main(int argc, const char * argv[]) {
     }
     
     printf("게임 종료\n");
+    
+    //졸업한 플레이어 정보 출력 
+    printf("졸업한 플레이어: %s\n", cur_player[turn].name);
+    printGrades(turn);
+    
     free(cur_player);
 
     return 0;
