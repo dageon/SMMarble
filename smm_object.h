@@ -18,6 +18,8 @@
 
 #define SMMNODE_TYPE_MAX			7
 
+#define GRADUATE_CREDIT				30
+
 typedef enum smmObjType {
 	smmObjType_board = 0,
 	smmObjType_card,
@@ -78,6 +80,8 @@ char* smmObj_getFestivalname(void* obj);
 
 //element to string
 char* smmObj_getTypeName(int type);
+
+int smmObj_NodeGrade(void* obj);
 
 
 #endif /* smm_object_h */
