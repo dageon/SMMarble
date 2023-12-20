@@ -167,11 +167,11 @@ void actionNode(int player)
 	int turn = (turn+1)%player_nr;
 	
 	int check=-1; //수강 의사 확인을 위한 변수 
-	 
+	int lec_flag=0; //수강 여부 확인을 위한 flag 
 	char c;
 	
 	int i; 
-	int lec_flag=0;
+	
 	
     switch(type)
     {
@@ -186,12 +186,13 @@ void actionNode(int player)
         		fflush(stdin);
         		// 수강 
         		if(check==1){
+        			// 에너지 먼저 확인 
         			if(cur_player[player].energy < smmObj_getNodeEnergy(boardPtr)) {
         				printf("%s는 에너지가 부족해 강의 수강 불가능\n", cur_player[player].name);
         				break;
 					}
 								
-
+					//이미 수강한 강의인지 확인 
 					for(i=0;i<smmdb_len(LISTNO_OFFSET_GRADE + player);i++){
 						gradePtr = smmdb_getData(LISTNO_OFFSET_GRADE + player, i);
 						if(strcmp(smmObj_getNodename(gradePtr),smmObj_getNodename(boardPtr))==0){
@@ -202,7 +203,7 @@ void actionNode(int player)
 						}
 					}
 					
-					
+					//수강하지 않은 강의라면 수강 
 					if(lec_flag!=1){
 						cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr);
         				cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr);
@@ -309,15 +310,33 @@ void goForward(int player, int step) {
 	void *boardPtr;
 	int i;
 	
+	//boardPtr = smmdb_getData(LISTNO_NODE, cur_player[player].position);
+	
 	// step을 더했을 때 위치 값이 보드판 번호를 벗어나는 경우 조절하기 위한 함수 
     if((cur_player[player].position+step)>=16) {
-			cur_player[player].position -= 16;
+			
 			printf("다시 처음");
+			for(i=cur_player[player].position;i<=15;i++){
+				boardPtr = smmdb_getData(LISTNO_NODE, i);
+				printf("	%i칸으로 이동 => %s\n", i, smmObj_getNodename(boardPtr));
+			}
+			cur_player[player].position -= 16;
+			cur_player[player].position += step;
+			for(i=0;i<=cur_player[player].position;i++){
+				boardPtr = smmdb_getData(LISTNO_NODE, i);
+				printf("	%i칸으로 이동 => %s\n", i, smmObj_getNodename(boardPtr));
+			}
 	}
-	
+	else{
+		for(i=cur_player[player].position+1;i<=cur_player[player].position+step; i++) {
+    		boardPtr = smmdb_getData(LISTNO_NODE, i);
+    		printf("	%i칸으로 이동 => %s\n", i, smmObj_getNodename(boardPtr));
+    	}
+    	cur_player[player].position += step;
+	}
 	//cur_player[player].position += step;
 	
-	boardPtr = smmdb_getData(LISTNO_NODE, cur_player[player].position);
+	
 	/*
 	printf("%s go to node %i (name: %s)\n", cur_player[player].name,
 				cur_player[player].position,
@@ -325,13 +344,10 @@ void goForward(int player, int step) {
 	*/
 			
 	// 주사위 결과 이동하는 과정 출력
-	for(i=cur_player[player].position+1;i<=cur_player[player].position+step; i++) {
-    	boardPtr = smmdb_getData(LISTNO_NODE, i);
-    	printf("	%i칸으로 이동 => %s\n", i, smmObj_getNodename(boardPtr));
-    }
+
     
     // 주사위 결과만큼 이동
-    cur_player[player].position += step;
+    //cur_player[player].position += step;
     
     // 플레이어의 도착 위치 출력
     printf("%s go to node %i (name: %s)\n", cur_player[player].name,
