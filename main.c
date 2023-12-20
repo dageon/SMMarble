@@ -319,8 +319,8 @@ void actionNode(int player)
 			printf("음식 카드를 뽑기 위해 아무 키나 눌러주세요.  ");
 			c = getchar();
 			fflush(stdin);
-			cur_player[player].energy += smmObj_getFoodCharge(foodPtr);
-			printf("%s는 %s 먹고  에너지(%i) 보충합니다.\n\n",cur_player[player].name, smmObj_getFoodname(foodPtr), smmObj_getFoodCharge(foodPtr));
+			cur_player[player].energy += smmObj_getNodeEnergy(foodPtr);
+			printf("%s는 %s 획득 (에너지: %i).\n\n",cur_player[player].name, smmObj_getNodename(foodPtr), smmObj_getNodeEnergy(foodPtr));
 			break;
 			
 		//case festival:
@@ -461,7 +461,8 @@ int main(int argc, const char * argv[]) {
     while ((fscanf(fp, "%s%i", food, &charge)) == 2) //read a food parameter set
     {
     	//store the parameter set
-    	void *foodObj = smmObj_genFood(food, charge);
+    	void *foodObj = smmObj_genObject(food, smmObjType_card, 0, 0, charge, 0);
+    	
         smmdb_addTail(LISTNO_FOODCARD, foodObj);
         
         food_nr++;
@@ -475,8 +476,8 @@ int main(int argc, const char * argv[]) {
     	void *foodObj = smmdb_getData(LISTNO_FOODCARD, i);
 
     	printf("=> %i. %s charge:%i\n",
-			i, smmObj_getFoodname(foodObj),
-			smmObj_getFoodCharge(foodObj));
+			i, smmObj_getNodename(foodObj),
+			smmObj_getNodeEnergy(foodObj));
     }
     
 
@@ -492,7 +493,6 @@ int main(int argc, const char * argv[]) {
     printf("\n\nReading festival card component......\n");
     while ((fscanf(fp, "%s", festival)) == 1) //read a festival card string
     {
-    	//void *festObj = smmObj_genFestival(festival);
     	void *festObj = smmObj_genObject(festival, smmObjType_card, 0, 0, 0, 0);
         smmdb_addTail(LISTNO_FESTCARD, festObj);
         
