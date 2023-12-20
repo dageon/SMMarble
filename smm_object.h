@@ -70,16 +70,11 @@ char* smmObj_getNodename(void* obj);
 int smmObj_getNodeType(void* obj);
 int smmObj_getNodeCredit(void* obj);
 int smmObj_getNodeEnergy(void* obj);
-
-char* smmObj_getFoodname(void* obj);
-int smmObj_getFoodCharge(void* obj);
-
-char* smmObj_getFestivalname(void* obj);
+int smmObj_getNodeGrade(void* obj);
 
 //element to string
 char* smmObj_getTypeName(int type);
 
-int smmObj_NodeGrade(void* obj);
 
 
 #endif /* smm_object_h */

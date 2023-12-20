@@ -1,6 +1,6 @@
 //
 //  main.c
-//  SMMarble
+//  SMMarble 
 //
 //  Created by Juyeop Kim on 2023/11/05.
 //
@@ -84,10 +84,8 @@ void printGrades(int player)
 	{
 		//저장된 성적 데이터 읽어옵 
 		gradePtr = smmdb_getData(LISTNO_OFFSET_GRADE + player, i);
-		//학점 출력
-		//printf("%s : %s\n", smmObj_getNodename(gradePtr), gradename[smmObj_NodeGrade(gradePtr)]);
 		//성적 합산하기 (성적변환점수X이수학점) 
-		gradesum = gradesum + gradenum[smmObj_NodeGrade(gradePtr)] * smmObj_getNodeCredit(gradePtr);
+		gradesum = gradesum + gradenum[smmObj_getNodeGrade(gradePtr)] * smmObj_getNodeCredit(gradePtr);
 		//이수학점 합산하기 
 		creditsum = creditsum + smmObj_getNodeCredit(gradePtr);
 	}
@@ -106,10 +104,10 @@ void printGrades(int player)
 	
 	for (i=0;i<smmdb_len(LISTNO_OFFSET_GRADE + player);i++)
 	{
-		//저장된 성적 데이터 읽어옵 
+		//저장된 성적 데이터 읽어오기 
 		gradePtr = smmdb_getData(LISTNO_OFFSET_GRADE + player, i);
 		//학점 출력
-		printf("  => %s : %s\n", smmObj_getNodename(gradePtr), gradename[smmObj_NodeGrade(gradePtr)]);
+		printf("  => %s : %s\n", smmObj_getNodename(gradePtr), gradename[smmObj_getNodeGrade(gradePtr)]);
 	}
 	
 	
@@ -270,14 +268,13 @@ void actionNode(int player)
         	
         //case laboratory:
         case SMMNODE_TYPE_LABORATORY:
-        	printf("실험실\n\n");
 			if (cur_player[player].flag_escape == 1) {
 				play_exp(turn, sucess);
 				printf("성공했을까");
 				break;
 			}
 			else {	
-				printf("%s는 그대로 실험실을 지나칩니다.\n",cur_player[player].name);
+				printf("%s는 실험 중 상태가 아니라 그대로 실험실을 지나칩니다.\n\n",cur_player[player].name);
 			}
 			/*
         	if(cur_player[player].flag_graduate == 1) {
@@ -306,9 +303,9 @@ void actionNode(int player)
         //case experiment:
         case SMMNODE_TYPE_GOTOLAB:
         	printf("실험 중 상태\n\n");
-        	sucess = rollDice();
-        	cur_player[player].position = 8; //??κ? ????? ?? 
-        	cur_player[player].flag_escape = 1;
+        	sucess = rollDice(); 
+        	cur_player[player].position = 8; //??κ? ????? ??  
+        	cur_player[player].flag_escape = 1; 
         	play_exp(turn, sucess);
 			break;
 			
@@ -359,7 +356,7 @@ void goForward(int player, int step) {
 		if(cur_player[player].position>=1){
 			boardPtr = smmdb_getData(LISTNO_NODE, 0);
 			cur_player[player].energy += smmObj_getNodeEnergy(boardPtr);
-        	printf("%s 집에서 에너지 보충합니다 => %d.\n\n", cur_player[player].name, cur_player[player].energy);
+        	//printf("%s 집에서 에너지 보충합니다 => %d.\n\n", cur_player[player].name, cur_player[player].energy);
 		}
 		// 보드판 번호 다시 계산 후 경로 출력 
 		for(i=0;i<=cur_player[player].position;i++){
@@ -508,7 +505,12 @@ int main(int argc, const char * argv[]) {
     }
     
     
-    
+    // 게임 시작 화면
+	printf("\n\n\n=======================================================================\n");
+	printf("-----------------------------------------------------------------------\n");
+	printf("        Sookmyung Marble !! Let's Graduate (total credit : %d)!!\n", GRADUATE_CREDIT);
+	printf("-----------------------------------------------------------------------\n");
+	printf("=======================================================================\n\n\n");
     
     //2. Player configuration ---------------------------------------------------------------------------------
     

@@ -34,26 +34,6 @@ typedef struct smmObject {
 } smmObject_t;
 
 
-typedef struct smmFood{
-	char food[MAX_CHARNAME];
-	int charge;
-} smmObject_f;
-
-typedef struct smmFestival{
-	char festival[MAX_CHARNAME];
-} smmObject_v;
-
-//static smmObject_t smm_node[MAX_NODE];
-//static int smmObj_noNode = 0;
-
-//static char smmObj_food[MAX_NODE][MAX_CHARNAME];
-//static int smmObj_charge[MAX_NODE];
-//static int smmObj_noFood = 0;
-
-//static char smmObj_festival[MAX_NODE][MAX_CHARNAME];
-//static int smmObj_noFestival = 0;
-
- 
 //object generation
 void* smmObj_genObject(char* name, smmObjType_e objType, int type, int credit, int energy, smmObjGrade_e grade)
 {
@@ -70,28 +50,6 @@ void* smmObj_genObject(char* name, smmObjType_e objType, int type, int credit, i
     return ptr;
 }
 
-//음식 카드 생성 
-void* smmObj_genFood(char* food, int charge)
-{
-	smmObject_f* ptr;
-	ptr = (smmObject_f*)malloc(sizeof(smmObject_f));
-	
-	strcpy(ptr->food, food);
-	ptr->charge = charge;
-	
-	return ptr;
-}
-
-//페스티벌 카드 생성 
-void* smmObj_genFestival(char* festival)
-{
-	smmObject_v* ptr;
-	ptr = (smmObject_v*)malloc(sizeof(smmObject_v));
-	
-	strcpy(ptr->festival, festival);
-    
-    return ptr;
-}
 
 //member retrieving
 char* smmObj_getNodename(void* obj)
@@ -118,26 +76,12 @@ int smmObj_getNodeEnergy(void* obj)
 	return ptr->energy;
 }
 
-
-//음식 카드 초기 
-char* smmObj_getFoodname(void* obj)
+int smmObj_getNodeGrade(void* obj)
 {
-	smmObject_f* ptr = (smmObject_f*)obj;
-	return ptr->food;
-}
-int smmObj_getFoodCharge(void* obj)
-{
-	smmObject_f* ptr = (smmObject_f*)obj;
-	return ptr->charge;
+	smmObject_t* ptr = (smmObject_t*)obj;
+	return ptr->grade;
 }
 
-
-//페스티벌 카드 초기화 
-char* smmObj_getFestivalname(void* obj)
-{
-	smmObject_v* ptr = (smmObject_v*)obj;
-	return ptr->festival;
-}
 
 //element to string
 char* smmObj_getTypeName(int type)
@@ -145,17 +89,3 @@ char* smmObj_getTypeName(int type)
 	return (char*)smmNodeName[type];
 
 }
-
-
-int smmObj_NodeGrade(void* obj)
-{
-	smmObject_t* ptr = (smmObject_t*)obj;
-	return ptr->grade;
-}
-
-/*
-char* smmObj_getGradeName(smmGrade_e grade)
-{
-    return smmGradeName[grade];
-}
-*/
