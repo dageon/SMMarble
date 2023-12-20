@@ -30,8 +30,8 @@ typedef struct plyaer {
 	int position;
 	char name[MAX_CHARNAME];
 	int accumCredit;
-	
 	int flag_graduate;
+	
 	int flag_escape; 
 } player_t;
 
@@ -58,6 +58,7 @@ void* findGrade(int player, char *lectureName); //find the grade from the player
 void printGrades(int player); //print all the grade history of the player
 #endif
 
+
 int isGraduated(int player) {
 	if((cur_player[player].accumCredit >= GRADUATE_CREDIT) && cur_player[player].position == 0){
 		cur_player[player].flag_graduate = 1;
@@ -65,20 +66,53 @@ int isGraduated(int player) {
 	return cur_player[player].flag_graduate;
 }
 
+//학점 출력을 위한 배열 
 const char* gradename[] = {"A+", "A0", "A-", "B+", "B0", "B-", "C+", "C0", "C-"};
+const double gradenum[] = {4.3, 4.0, 3.7, 3.3, 3.0, 2.7, 2.3, 2.0, 1.7};
 
 void printGrades(int player)
 {
 	int i;
 	void* gradePtr;
-	printf("--> Printing player's grade (average ((구현))) ::::\n") ;
+	double gradesum=0; //총 성적 
+	int creditsum=0;  //총 이수학점 
+	double gradeavg=0; //최종 평점 
+	
+	void *boardPtr = smmdb_getData(LISTNO_NODE, cur_player[player].position );
+	
 	for (i=0;i<smmdb_len(LISTNO_OFFSET_GRADE + player);i++)
 	{
 		//저장된 성적 데이터 읽어옵 
 		gradePtr = smmdb_getData(LISTNO_OFFSET_GRADE + player, i);
-		//알파벳 출력
-		printf("%s : %s\n", smmObj_getNodename(gradePtr), gradename[smmObj_NodeGrade(gradePtr)]);
+		//학점 출력
+		//printf("%s : %s\n", smmObj_getNodename(gradePtr), gradename[smmObj_NodeGrade(gradePtr)]);
+		//성적 합산하기 (성적변환점수X이수학점) 
+		gradesum = gradesum + gradenum[smmObj_NodeGrade(gradePtr)] * smmObj_getNodeCredit(gradePtr);
+		//이수학점 합산하기 
+		creditsum = creditsum + smmObj_getNodeCredit(gradePtr);
 	}
+	//성적 계산하기 
+	gradeavg = gradesum/creditsum;
+	
+	//성적이 있는 경우 
+	if(gradeavg>0){
+		printf("--> Printing player's grade (average (%f)) ::::\n", gradeavg);
+	}
+	//성적이 없는 경우 
+	else{
+		gradeavg = 0;
+		printf("--> Printing player's grade (average (%f)) ::::\n", gradeavg);
+	}
+	
+	for (i=0;i<smmdb_len(LISTNO_OFFSET_GRADE + player);i++)
+	{
+		//저장된 성적 데이터 읽어옵 
+		gradePtr = smmdb_getData(LISTNO_OFFSET_GRADE + player, i);
+		//학점 출력
+		printf("  => %s : %s\n", smmObj_getNodename(gradePtr), gradename[smmObj_NodeGrade(gradePtr)]);
+	}
+	
+	
 }
 
 void printPlayerStatus(void) 
@@ -138,6 +172,7 @@ int rolldie(int player)
     return (rand()%MAX_DIE + 1);
 }
 
+
 void play_exp(int player, int sucess) {
 	int dicenum = rollDice();
 	printf("\n주사위값 : %i\n", dicenum);
@@ -162,15 +197,16 @@ void actionNode(int player)
 	void *gradePtr;
 	//int type = smmObj_getNodeType(cur_player[player].position);
 	int type = smmObj_getNodeType(boardPtr);
-	int grade;
+	//int grade; 사용안함 
 	int sucess;
 	int turn = (turn+1)%player_nr;
 	
 	int check=-1; //수강 의사 확인을 위한 변수 
 	int lec_flag=0; //수강 여부 확인을 위한 flag 
-	char c;
 	
-	int i; 
+	char c; //카드 뽑을 때 입력받을 변수 
+	
+	int i; //for문 사용 변수 
 	
 	
     switch(type)
@@ -215,7 +251,6 @@ void actionNode(int player)
         				break;
 					}
 					break;
-
 				}
 				// 드랍 
         		else if(check==0) {
@@ -310,23 +345,30 @@ void goForward(int player, int step) {
 	void *boardPtr;
 	int i;
 	
-	//boardPtr = smmdb_getData(LISTNO_NODE, cur_player[player].position);
-	
-	// step을 더했을 때 위치 값이 보드판 번호를 벗어나는 경우 조절하기 위한 함수 
+	// step(주사위 눈)을 더했을 때 위치 값이 보드판 번호를 벗어나는 경우 
     if((cur_player[player].position+step)>=16) {
-			
-			printf("다시 처음");
-			for(i=cur_player[player].position;i<=15;i++){
-				boardPtr = smmdb_getData(LISTNO_NODE, i);
-				printf("	%i칸으로 이동 => %s\n", i, smmObj_getNodename(boardPtr));
-			}
-			cur_player[player].position -= 16;
-			cur_player[player].position += step;
-			for(i=0;i<=cur_player[player].position;i++){
-				boardPtr = smmdb_getData(LISTNO_NODE, i);
-				printf("	%i칸으로 이동 => %s\n", i, smmObj_getNodename(boardPtr));
-			}
+    	// 보드 끝까지 이동 경로 출력 
+		for(i=cur_player[player].position;i<=15;i++){
+			boardPtr = smmdb_getData(LISTNO_NODE, i);
+			printf("	%i칸으로 이동 => %s\n", i, smmObj_getNodename(boardPtr));
+		}
+		
+		cur_player[player].position -= 16;
+		cur_player[player].position += step;
+		
+		// 우리집 지날 때 에너지 보충 
+		if(cur_player[player].position>=1){
+			boardPtr = smmdb_getData(LISTNO_NODE, 0);
+			cur_player[player].energy += smmObj_getNodeEnergy(boardPtr);
+        	printf("%s 집에서 에너지 보충합니다 => %d.\n\n", cur_player[player].name, cur_player[player].energy);
+		}
+		// 보드판 번호 다시 계산 후 경로 출력 
+		for(i=0;i<=cur_player[player].position;i++){
+			boardPtr = smmdb_getData(LISTNO_NODE, i);
+			printf("	%i칸으로 이동 => %s\n", i, smmObj_getNodename(boardPtr));
+		}
 	}
+	// 보드판 번호를 벗어나지 않는 경우 
 	else{
 		for(i=cur_player[player].position+1;i<=cur_player[player].position+step; i++) {
     		boardPtr = smmdb_getData(LISTNO_NODE, i);
@@ -334,21 +376,7 @@ void goForward(int player, int step) {
     	}
     	cur_player[player].position += step;
 	}
-	//cur_player[player].position += step;
-	
-	
-	/*
-	printf("%s go to node %i (name: %s)\n", cur_player[player].name,
-				cur_player[player].position,
-				smmObj_getNodename(boardPtr));
-	*/
-			
-	// 주사위 결과 이동하는 과정 출력
 
-    
-    // 주사위 결과만큼 이동
-    //cur_player[player].position += step;
-    
     // 플레이어의 도착 위치 출력
     printf("%s go to node %i (name: %s)\n", cur_player[player].name,
 				cur_player[player].position,
