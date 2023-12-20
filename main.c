@@ -195,9 +195,8 @@ void actionNode(int player)
 	void *foodPtr;
 	void *festPtr;
 	void *gradePtr;
-	//int type = smmObj_getNodeType(cur_player[player].position);
-	int type = smmObj_getNodeType(boardPtr);
-	//int grade; 사용안함 
+	int type = smmObj_getNodeType(boardPtr); 
+	
 	int sucess;
 	int turn = (turn+1)%player_nr;
 	
@@ -206,7 +205,7 @@ void actionNode(int player)
 	
 	char c; //카드 뽑을 때 입력받을 변수 
 	
-	int i; //for문 사용 변수 
+	int i; //for문 사용 변수
 	
 	
     switch(type)
@@ -331,7 +330,7 @@ void actionNode(int player)
 			printf("페스티벌 카드를 뽑기 위해 아무 키나 눌러주세요.  ");
 			c = getchar();
 			fflush(stdin);
-			printf("-> Mission : %s \n", smmObj_getFestivalname(festPtr));
+			printf("-> Mission : %s \n", smmObj_getNodename(festPtr));
     		printf("미션 완료 후 아무 키나 눌러주세요.  ");
     		c = getchar();
     		fflush(stdin);
@@ -478,8 +477,6 @@ int main(int argc, const char * argv[]) {
     	printf("=> %i. %s charge:%i\n",
 			i, smmObj_getFoodname(foodObj),
 			smmObj_getFoodCharge(foodObj));
-    	
-    	//printf("=> %i. %s, credit:%i\n", i, smmObj_getFoodname(i), smmObj_getFoodCharge(i));
     }
     
 
@@ -495,7 +492,8 @@ int main(int argc, const char * argv[]) {
     printf("\n\nReading festival card component......\n");
     while ((fscanf(fp, "%s", festival)) == 1) //read a festival card string
     {
-    	void *festObj = smmObj_genFestival(festival);
+    	//void *festObj = smmObj_genFestival(festival);
+    	void *festObj = smmObj_genObject(festival, smmObjType_card, 0, 0, 0, 0);
         smmdb_addTail(LISTNO_FESTCARD, festObj);
         
         festival_nr++;
@@ -506,7 +504,7 @@ int main(int argc, const char * argv[]) {
     for(i=0;i<festival_nr;i++)
     {
     	void *festObj = smmdb_getData(LISTNO_FESTCARD, i);
-    	printf("=> %i. %s\n", i, smmObj_getFestivalname(festObj));
+    	printf("=> %i. %s\n", i, smmObj_getNodename(festObj));
     }
     
     
@@ -554,7 +552,7 @@ int main(int argc, const char * argv[]) {
         turn = (turn + 1) % player_nr;
     }
     
-    printf("게임 종료\n");
+    printf("\n게임이 종료되었습니다.\n");
     
     //졸업한 플레이어 정보 출력 
     printf("졸업한 플레이어: %s\n", cur_player[turn].name);
