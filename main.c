@@ -183,10 +183,12 @@ int rolldie(int player)
 void play_exp(int player, int sucess) {
 	int dicenum = rollDice();
 	printf("\n주사위값 : %i\n", dicenum);
+	//실험 성공 기준값 이상이면 실험실 탈출 
 	if(dicenum>=sucess){
 		printf("플레이어 탈출\n\n");
 		cur_player[player].flag_escape=0;
 	}
+	//실험 성공 기준값 못 넘거면 실험실 탈출 실패 
 	else{
 		printf("플레이어 탈출 실패\n\n");
 		cur_player[player].flag_escape=1;
@@ -247,12 +249,13 @@ void actionNode(int player)
 					}
 					
 					
-					//수강하지 않은 강의라면 수강 
+					//에너지가 있고 수강하지 않은 강의라면 수강할 수 있음 
 					if(lec_flag!=1){
 						cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr);
         				cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr);
         		
 						gradePtr = smmObj_genObject(smmObj_getNodename(boardPtr), smmObjType_grade, 0, smmObj_getNodeCredit(boardPtr), 0, rand()%smmObjGrade_COUNT);
+						//수강 성적 함께 출력 
 						printf("%s 수강하였습니다 (grade:%s) \n\n", smmObj_getNodename(boardPtr), gradename[smmObj_getNodeGrade(gradePtr)]);
             			smmdb_addTail(LISTNO_OFFSET_GRADE + player, gradePtr);
 
@@ -260,11 +263,12 @@ void actionNode(int player)
 					}
 					break;
 				}
-				// 드랍 
+				//드랍
         		else if(check==0) {
         			printf("%s 드랍하였습니다\n\n", smmObj_getNodename(boardPtr));
         			break;
 				}
+				//1, 0이 아닌 다른 입력을 했을 경우 다시 입력
 				else{
 					printf("1(수강), 0(드랍) 중에서  입력해주세요.  ");
 				}
@@ -295,6 +299,7 @@ void actionNode(int player)
         	
         //case home:
         case SMMNODE_TYPE_HOME:
+        	//집에서 에너지 보충 
         	cur_player[player].energy += smmObj_getNodeEnergy(boardPtr);
         	printf("%s 집에서 에너지 보충합니다.\n\n", cur_player[player].name);
         	break;
@@ -315,6 +320,7 @@ void actionNode(int player)
 			printf("음식 카드를 뽑기 위해 아무 키나 눌러주세요.  ");
 			c = getchar();
 			fflush(stdin);
+			//음식에 해당하는 에너지 획득 
 			cur_player[player].energy += smmObj_getNodeEnergy(foodPtr);
 			printf("%s는 %s 획득 (에너지: %i).\n\n",cur_player[player].name, smmObj_getNodename(foodPtr), smmObj_getNodeEnergy(foodPtr));
 			break;
@@ -351,7 +357,9 @@ void goForward(int player, int step) {
 			printf("	%i칸으로 이동 => %s\n", i, smmObj_getNodename(boardPtr));
 		}
 		
+		// 보드판 번호를 처음으로 되돌려주기 
 		cur_player[player].position -= 16;
+		// 주사위눈(step)만큼 이동하기 
 		cur_player[player].position += step;
 		
 		// 우리집 지날 때 에너지 보충 
